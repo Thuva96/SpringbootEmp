@@ -13,13 +13,18 @@ import java.util.function.Function;
 
 @Service
 public class JwtService {
-    private final  String SECRET_KEY="30d11c2c9a5c5fe7ac531dd507aeaf34a257d1130df6111f4e1de8c40d1fc666";
+    private final String SECRET_KEY = "30d11c2c9a5c5fe7ac531dd507aeaf34a257d1130df6111f4e1de8c40d1fc666";
 
-    public String extractUsername(String token){
-        return extractClaims(token,Claims::getSubject);
+    public String extractUsername(String token) {
+        return extractClaims(token, Claims::getSubject);
     }
-    public  boolean isValid(String token, UserDetails user){
-        String username=extractUsername(token);
+
+    public String extractRole(String token) {
+        return extractClaims(token, claims -> claims.get("role", String.class));
+    }
+
+    public boolean isValid(String token, UserDetails user) {
+        String username = extractUsername(token);
         return username.equals(user.getUsername()) && !isTokenExpired(token);
     }
 
@@ -28,43 +33,38 @@ public class JwtService {
     }
 
     private Date extractExpiration(String token) {
-        return  extractClaims(token,Claims::getExpiration);
+        return extractClaims(token, Claims::getExpiration);
     }
 
-    public <T> T extractClaims(String token, Function<Claims,T> resolver){
-        Claims claims =extractAllClaims((token));
+    public <T> T extractClaims(String token, Function<Claims, T> resolver) {
+        Claims claims = extractAllClaims(token);
         return resolver.apply(claims);
     }
 
-    private Claims extractAllClaims(String token){
-        return  Jwts
+    private Claims extractAllClaims(String token) {
+        return Jwts
                 .parser()
-                .verifyWith(getSigninKey())
+                .setSigningKey(getSigninKey())
                 .build()
-                .parseSignedClaims(token)
-                .getPayload();
-
-
+                .parseClaimsJws(token)
+                .getBody();
     }
 
-
-    public String generateToken(UserDetails userDetails){
-        String token= Jwts
+    public String generateToken(UserDetails userDetails) {
+        String token = Jwts
                 .builder()
-                .subject(userDetails.getUsername())
+                .setSubject(userDetails.getUsername())
+                .claim("role", userDetails.getAuthorities().stream().findFirst().get().getAuthority())
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis()+24*60*60*1000))
+                .expiration(new Date(System.currentTimeMillis() + 24 * 60 * 60 * 1000))
                 .signWith(getSigninKey())
                 .compact();
 
         return token;
-
-
-
     }
-    private SecretKey getSigninKey(){
-        byte[] keyBytes = Decoders.BASE64URL.decode( SECRET_KEY);
+
+    private SecretKey getSigninKey() {
+        byte[] keyBytes = Decoders.BASE64URL.decode(SECRET_KEY);
         return Keys.hmacShaKeyFor(keyBytes);
     }
-
 }
