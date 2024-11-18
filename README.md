@@ -1,12 +1,12 @@
-Employee CRUD
-JWT Websecurity
+Employee CRUD,
+JWT Websecurity,
 Role Authorization
        Only admin users should be able to: 
                a) Update employee information. 
                b) Delete employee information. 
- validations 
+ validations ,
 
-it contains  ER diagram and Sequence diagram and SQL dump file
+it contains  ER diagram and Sequence diagram and SQL dump file,
 Tech Stack 
 • Java 17  
 • Maven LTS 
