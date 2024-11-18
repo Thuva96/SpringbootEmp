@@ -9,6 +9,7 @@ import org.springframework.boot.autoconfigure.neo4j.Neo4jProperties;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -52,8 +53,8 @@ public class AuthenticationService {
             throw new RuntimeException("Invalid username or password");
         }
 
-        User user = repository.findByUsername(request.getUsername()).orElseThrow();
-        String token = JwtService.generateToken(user);
+        UserDetails userDetails = repository.findByUsername(request.getUsername()).orElseThrow();
+        String token = JwtService.generateToken(userDetails);
         return new AuthenticationResponse(token);
     }
 }

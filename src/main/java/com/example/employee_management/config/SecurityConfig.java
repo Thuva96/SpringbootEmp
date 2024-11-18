@@ -54,6 +54,7 @@ public class SecurityConfig {
                         .requestMatchers("/login/**", "/register/**").permitAll()
                         .requestMatchers("/api/employees/update/**").hasRole("ADMIN")
                         .requestMatchers("/api/employees/delete/**").hasRole("ADMIN")
+                        .requestMatchers("/save/**").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/api/employees/**").authenticated() // Secure employee endpoints
                         .anyRequest().authenticated()
                 )
